@@ -12,7 +12,7 @@ export function closePopup(popupElement) {
 function handleEscape(evt) {
 	if (evt.key === 'Escape') {
 		document
-			.querySelectorAll('.popup_is-opened')
+			.querySelector('.popup_is-opened')
 			.forEach(popup => closePopup(popup))
 	}
 }

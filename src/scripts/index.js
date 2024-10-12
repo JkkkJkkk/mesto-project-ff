@@ -1,7 +1,7 @@
 import '../pages/index.css'
 import { openPopup, closePopup, handleOverlayClick } from './modal'
 import { initialCards } from './cards'
-import { createCard } from './cards'
+import { createCard, handleDelete, handleLikeButton } from './card'
 
 document.addEventListener('DOMContentLoaded', () => {
 	// Определение основных DOM элементов
@@ -16,11 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	const nameInput = profilePopup.querySelector('input[name="name"]')
 	const jobInput = profilePopup.querySelector('input[name="description"]')
 
-	// Обработчик для кнопки лайка
-	function handleLikeButton(event) {
-		event.target.classList.toggle('card__like-button_active')
-	}
-
 	// Обработчик открытия попапа с изображением
 	function openImagePopup(imageUrl, imageAlt) {
 		const popupTypeImage = document.querySelector('.popup_type_image')
@@ -31,11 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		popupImage.alt = imageAlt
 		popupCaption.textContent = imageAlt
 		openPopup(popupTypeImage)
-	}
-
-	// Обработчик удаления карточки
-	function handleDelete(cardElement) {
-		cardElement.remove()
 	}
 
 	// Обработчик клика по изображению

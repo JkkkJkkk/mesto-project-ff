@@ -1,0 +1,9 @@
+.avatar__add_button {
+	background: none;
+	border: none;
+	width: 24px;
+	height: 24px;
+	background-image: url('../../../images/edit-icon.svg');
+	background-size: contain;
+	cursor: pointer;
+}

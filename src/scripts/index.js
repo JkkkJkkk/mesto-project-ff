@@ -1,9 +1,10 @@
 import '../pages/index.css'
-import '../scripts/api.js'
 import { openPopup, closePopup, handleOverlayClick } from './modal'
-import { createCard, handleDelete, handleLikeButton } from './card'
+import { createCard } from './card'
 import { enableValidation, clearValidation } from './validation'
+import { updateAvatar, getUserData, getCards, renderCards } from './api.js'
 
+const profileAvatar = document.querySelector('.profile__image')
 const profilePopup = document.querySelector('.popup_type_edit')
 const placesList = document.querySelector('.places__list')
 const profileEditButton = document.querySelector('.profile__edit-button')
@@ -17,6 +18,15 @@ const profileDescription = document.querySelector('.profile__description')
 const nameInput = profilePopup.querySelector('input[name="name"]')
 const jobInput = profilePopup.querySelector('input[name="description"]')
 
+export const validationConfig = {
+	formSelector: '.popup__form',
+	inputSelector: '.popup__input',
+	submitButtonSelector: '.popup__button',
+	inactiveButtonClass: 'popup__button_disabled',
+	inputErrorClass: 'popup__input_type_error',
+	errorClass: 'popup__error_visible',
+}
+
 export function openImagePopup(imageUrl, imageAlt) {
 	const popupTypeImage = document.querySelector('.popup_type_image')
 	const popupImage = popupTypeImage.querySelector('.popup__image')
@@ -28,26 +38,15 @@ export function openImagePopup(imageUrl, imageAlt) {
 	openPopup(popupTypeImage)
 }
 
-function handleImageClick(cardData) {
-	openImagePopup(cardData.link, cardData.name)
-}
-
 profileEditButton.addEventListener('click', () => {
 	nameInput.value = profileName.textContent
 	jobInput.value = profileDescription.textContent
+	clearValidation(formAddElement, validationConfig)
 	openPopup(profilePopup)
 })
 
-profilePopup.querySelector('.popup__form').addEventListener('submit', evt => {
-	evt.preventDefault()
-
-	profileName.textContent = nameInput.value
-	profileDescription.textContent = jobInput.value
-
-	closePopup(profilePopup)
-})
-
 profileAddButton.addEventListener('click', () => {
+	clearValidation(formAddElement, validationConfig)
 	openPopup(popupTypeNewCard)
 })
 
@@ -66,34 +65,6 @@ document.querySelectorAll('.popup').forEach(popup => {
 	popup.addEventListener('click', handleOverlayClick)
 })
 
-formAddElement.addEventListener('submit', evt => {
-	evt.preventDefault()
-
-	const newCardData = {
-		name: formAddElement.querySelector('input[name="place-name"]').value,
-		link: formAddElement.querySelector('input[name="link"]').value,
-	}
-
-	const newCard = createCard(
-		newCardData,
-		handleLikeButton,
-		handleDelete,
-		handleImageClick
-	)
-	placesList.prepend(newCard)
-	closePopup(popupTypeNewCard)
-	formAddElement.reset()
-})
-
-const validationConfig = {
-	formSelector: '.popup__form',
-	inputSelector: '.popup__input',
-	submitButtonSelector: '.popup__button',
-	inactiveButtonClass: 'popup__button_disabled',
-	inputErrorClass: 'popup__input_type_error',
-	errorClass: 'popup__error_visible',
-}
-
 enableValidation(validationConfig)
 
 profileEditButton.addEventListener('click', () => {
@@ -108,3 +79,57 @@ profileAddButton.addEventListener('click', () => {
 	clearValidation(formAddElement, validationConfig)
 	openPopup(popupTypeNewCard)
 })
+
+Promise.all([getUserData(), getCards()])
+	.then(([userData, cardsData]) => {
+		profileName.textContent = userData.name
+		profileDescription.textContent = userData.about
+		profileAvatar.style.backgroundImage = `url(${userData.avatar})`
+
+		renderCards(cardsData)
+	})
+	.catch(err => {
+		console.error(err)
+	})
+
+document.querySelector('.popup_type_edit').addEventListener('submit', evt => {
+	evt.preventDefault()
+	const profilePopup = document.querySelector('.popup_type_edit')
+	const nameInput = document.querySelector('input[name="name"]')
+	const jobInput = document.querySelector('input[name="description"]')
+
+	updateUserData(nameInput.value, jobInput.value)
+		.then(userData => {
+			profileName.textContent = userData.name
+			profileDescription.textContent = userData.about
+			closePopup(profilePopup)
+		})
+		.catch(err => {
+			console.error(err)
+		})
+})
+
+document
+	.querySelector('.popup_type_new-card')
+	.addEventListener('submit', evt => {
+		evt.preventDefault()
+
+		const nameInput = document.querySelector('input[name="place-name"]')
+		const linkInput = document.querySelector('input[name="link"]')
+
+		addCard(nameInput.value, linkInput.value)
+			.then(newCardData => {
+				const newCardElement = createCard(newCardData)
+				placesList.prepend(newCardElement)
+
+				closePopup(document.querySelector('.popup_type_new-card'))
+				evt.target.reset()
+			})
+			.catch(err => {
+				console.error(err)
+			})
+	})
+
+document
+	.querySelector('.popup__form[name="edit-avatar"]')
+	.addEventListener('submit', updateAvatar)

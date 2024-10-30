@@ -7,7 +7,7 @@ const token = '9bea7d06-a363-495d-8a84-706c9d81bcd2'
 
 const profileName = document.querySelector('.profile__title')
 const profileDescription = document.querySelector('.profile__description')
-const profileAvatar = document.querySelector('.profile__image')
+
 const placesList = document.querySelector('.places__list')
 
 const checkResponse = res => {
@@ -17,7 +17,7 @@ const checkResponse = res => {
 	return Promise.reject(`Ошибка: ${res.status}`)
 }
 
-const getUserData = () => {
+export const getUserData = () => {
 	return fetch(`${apiUrl}/users/me`, {
 		headers: {
 			authorization: token,
@@ -25,7 +25,7 @@ const getUserData = () => {
 	}).then(checkResponse)
 }
 
-const getCards = () => {
+export const getCards = () => {
 	return fetch(`${apiUrl}/cards`, {
 		headers: {
 			authorization: token,
@@ -33,24 +33,12 @@ const getCards = () => {
 	}).then(checkResponse)
 }
 
-const renderCards = cardsData => {
+export const renderCards = cardsData => {
 	cardsData.forEach(cardData => {
 		const cardElement = createCard(cardData)
 		placesList.prepend(cardElement)
 	})
 }
-
-Promise.all([getUserData(), getCards()])
-	.then(([userData, cardsData]) => {
-		profileName.textContent = userData.name
-		profileDescription.textContent = userData.about
-		profileAvatar.style.backgroundImage = `url(${userData.avatar})`
-
-		renderCards(cardsData)
-	})
-	.catch(err => {
-		console.error(err)
-	})
 
 function updateUserData(name, about) {
 	return fetch(`${apiUrl}/users/me`, {
@@ -63,30 +51,8 @@ function updateUserData(name, about) {
 			name: name,
 			about: about,
 		}),
-	}).then(response => {
-		if (!response.ok) {
-			return Promise.reject(`Ошибка: ${response.status}`)
-		}
-		return response.json()
-	})
+	}).then(checkResponse)
 }
-
-document.querySelector('.popup_type_edit').addEventListener('submit', evt => {
-	evt.preventDefault()
-
-	const nameInput = document.querySelector('input[name="name"]')
-	const jobInput = document.querySelector('input[name="description"]')
-
-	updateUserData(nameInput.value, jobInput.value)
-		.then(userData => {
-			profileName.textContent = userData.name
-			profileDescription.textContent = userData.about
-			closePopup(profilePopup)
-		})
-		.catch(err => {
-			console.error(err)
-		})
-})
 
 function addCard(name, link) {
 	if (!name || !link) {
@@ -106,34 +72,8 @@ function addCard(name, link) {
 			name: name,
 			link: link,
 		}),
-	}).then(response => {
-		if (!response.ok) {
-			return Promise.reject(`Ошибка: ${response.status}`)
-		}
-		return response.json()
-	})
+	}).then(checkResponse)
 }
-
-document
-	.querySelector('.popup_type_new-card')
-	.addEventListener('submit', evt => {
-		evt.preventDefault()
-
-		const nameInput = document.querySelector('input[name="place-name"]')
-		const linkInput = document.querySelector('input[name="link"]')
-
-		addCard(nameInput.value, linkInput.value)
-			.then(newCardData => {
-				const newCardElement = createCard(newCardData)
-				placesList.prepend(newCardElement)
-
-				closePopup(document.querySelector('.popup_type_new-card'))
-				evt.target.reset()
-			})
-			.catch(err => {
-				console.error(err)
-			})
-	})
 
 export function likeCard(cardId) {
 	return fetch(`${apiUrl}/cards/likes/${cardId}`, {
@@ -158,7 +98,7 @@ export function deleteCard(cardId) {
 	}).then(checkResponse)
 }
 
-function updateAvatar(evt) {
+export function updateAvatar(evt) {
 	evt.preventDefault()
 
 	const avatarUrl = document.querySelector('.popup__input_type_url').value
@@ -178,12 +118,7 @@ function updateAvatar(evt) {
 			avatar: avatarUrl,
 		}),
 	})
-		.then(response => {
-			if (!response.ok) {
-				return Promise.reject(`Ошибка: ${response.status}`)
-			}
-			return response.json()
-		})
+		.then(checkResponse)
 		.then(data => {
 			document.querySelector('.profile__image').src = data.avatar
 			closePopup(document.querySelector('.popup_type_avatar'))
@@ -192,7 +127,3 @@ function updateAvatar(evt) {
 			console.error(err)
 		})
 }
-
-document
-	.querySelector('.popup__form[name="edit-avatar"]')
-	.addEventListener('submit', updateAvatar)

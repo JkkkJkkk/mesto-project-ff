@@ -53,6 +53,11 @@
 							class="popup__input popup__input_type_name"
 							placeholder="Имя"
 							required
+							pattern="^[a-zA-Zа-яА-ЯёЁ\-\s]{2,30}$"
+							minlength="2"
+							maxlength="30"
+							data-error-message="Разрешены только буквы, дефисы и пробелы"
+							data-length-error="Имя должно содержать от 2 до 30 символов"
 						/>
 						<span class="popup__error"></span>
 						<input
@@ -61,6 +66,10 @@
 							class="popup__input popup__input_type_description"
 							placeholder="Занятие"
 							required
+							pattern="^[a-zA-Zа-яА-ЯёЁ\-\s]{2,200}$"
+							minlength="2"
+							maxlength="200"
+							data-error-message="Описание должно содержать от 2 до 200 символов, включая буквы и дефисы"
 						/>
 						<span class="popup__error"></span>
 						<button type="submit" class="button popup__button">
@@ -80,6 +89,10 @@
 							class="popup__input popup__input_type_card-name"
 							placeholder="Название"
 							required
+							pattern="^[a-zA-Zа-яА-ЯёЁ\-\s]{2,40}$"
+							minlength="2"
+							maxlength="200"
+							data-error-message="Название карточки должно содержать от 2 до 40 символов, включая буквы и дефисы"
 						/>
 						<span class="popup__error"></span>
 						<input
@@ -88,6 +101,8 @@
 							class="popup__input popup__input_type_url"
 							placeholder="Ссылка на картинку"
 							required
+							pattern="^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$"
+							data-error-message="Введите корректный URL"
 						/>
 						<span class="popup__error"></span>
 						<button type="submit" class="button popup__button">
@@ -104,7 +119,7 @@
 				</div>
 			</div>
 			<div class="popup popup_type_avatar">
-				<div class="popup__content" style="min-height: 0;">
+				<div class="popup__content" style="min-height: 0">
 					<button type="button" class="popup__close"></button>
 					<h3 class="popup__title">Обновить аватар</h3>
 					<form class="popup__form" name="edit-avatar">
@@ -114,6 +129,8 @@
 							class="popup__input popup__input_type_url"
 							placeholder="Ссылка на картинку"
 							required
+							pattern="^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$"
+							data-error-message="Введите корректный URL"
 						/>
 						<span class="popup__error"></span>
 						<button type="submit" class="button popup__button">

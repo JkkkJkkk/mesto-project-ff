@@ -1,8 +1,4 @@
-function showError(input, message, config) {
-	const errorElement = input.nextElementSibling
-	errorElement.textContent = message
-	input.classList.add(config.inputErrorClass)
-}
+import { validationConfig } from './index'
 
 function hideError(input, config) {
 	const errorElement = input.nextElementSibling
@@ -10,57 +6,31 @@ function hideError(input, config) {
 	input.classList.remove(config.inputErrorClass)
 }
 
-function validateInput(input, config) {
-	let isValid = true
-	const value = input.value.trim()
-	const namePattern = /^[a-zA-Zа-яА-ЯёЁ\s-]{2,40}$/
-	const newPlaseNamePattern = /^[a-zA-Zа-яА-ЯёЁ\s-]{2,30}$/
-	const descriptionPattern = /^[a-zA-Zа-яА-ЯёЁ\s-]{2,200}$/
-	const urlPattern = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$/
+const validateInput = input => {
+	const errorElement = input.nextElementSibling
 
-	if (input.name === 'name' || input.name === 'place-name') {
-		const pattern = input.name === 'name' ? namePattern : newPlaseNamePattern
-		if (!pattern.test(value)) {
-			const customMessage =
-				'Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы'
-			input.dataset.error = customMessage
-			showError(input, customMessage, config)
-			isValid = false
-		} else {
-			hideError(input, config)
-		}
+	if (!input.validity.valid) {
+		const errorMessage = input.dataset.errorMessage || input.validationMessage
+		errorElement.textContent = errorMessage
+		errorElement.classList.add('popup__error_visible')
+	} else {
+		errorElement.textContent = ''
+		errorElement.classList.remove('popup__error_visible')
 	}
+}
 
-	if (input.name === 'description') {
-		if (!descriptionPattern.test(value)) {
-			const customMessage =
-				'Описание должно содержать от 2 до 200 символов, включая только буквы, пробелы и дефисы'
-			input.dataset.error = customMessage
-			showError(input, customMessage, config)
-			isValid = false
-		} else {
-			hideError(input, config)
-		}
-	}
-
-	if (input.name === 'link') {
-		if (!urlPattern.test(value)) {
-			showError(input, 'Введите корректный URL', config)
-			isValid = false
-		} else {
-			hideError(input, config)
-		}
-	}
-
-	return isValid
+const validateForm = form => {
+	const inputs = form.querySelectorAll('input')
+	inputs.forEach(input => validateInput(input))
 }
 
 function toggleSubmitButton(form, config) {
 	const inputs = Array.from(form.querySelectorAll(config.inputSelector))
-	const isValidForm = inputs.every(input => validateInput(input, config))
 	const submitButton = form.querySelector(config.submitButtonSelector)
-	submitButton.disabled = !isValidForm
-	submitButton.classList.toggle(config.inactiveButtonClass, !isValidForm)
+	const isFormValid = inputs.every(input => input.validity.valid)
+
+	submitButton.disabled = !isFormValid
+	submitButton.classList.toggle(config.inactiveButtonClass, !isFormValid)
 }
 
 function resetValidationErrors(form, config) {
@@ -76,23 +46,18 @@ export function clearValidation(form, config) {
 	submitButton.classList.add(config.inactiveButtonClass)
 }
 
-export function enableValidation(config) {
-	const forms = Array.from(document.querySelectorAll(config.formSelector))
-	forms.forEach(form => {
-		const inputs = Array.from(form.querySelectorAll(config.inputSelector))
+export const enableValidation = config => {
+	const forms = document.querySelectorAll(config.formSelector)
 
-		inputs.forEach(input => {
-			input.addEventListener('input', () => {
-				validateInput(input, config)
-				toggleSubmitButton(form, config)
-			})
+	forms.forEach(form => {
+		form.addEventListener('submit', event => {
+			event.preventDefault()
+			clearValidation(form, config)
 		})
 
-		form.addEventListener('submit', evt => {
-			evt.preventDefault()
-			if (!inputs.every(input => validateInput(input, config))) {
-				return
-			}
+		const inputs = form.querySelectorAll(config.inputSelector)
+		inputs.forEach(input => {
+			input.addEventListener('input', () => validateInput(input, config))
 		})
 	})
 }

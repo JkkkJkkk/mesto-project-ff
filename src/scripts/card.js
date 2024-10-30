@@ -22,30 +22,25 @@ export function createCard(cardData, userId, deleteHandler) {
 	cardTitle.textContent = cardData.name
 	cardLikeCount.textContent = cardData.likes.length
 
-	cardDeleteButton.addEventListener('click', () => deleteHandler(cardElement))
-	document.querySelectorAll('.card__image').forEach(image => {
-		image.addEventListener('click', () => {
-			const imageUrl = image.src
-			const imageCaption = image.alt
-			openImagePopup(imageUrl, imageCaption)
-		})
+	cardDeleteButton.addEventListener('click', () =>
+		deleteHandler(cardData._id, cardElement)
+	)
+	cardPicture.addEventListener('click', () => {
+		openImagePopup(cardData.link, cardData.name)
 	})
 
 	cardLikeButton.addEventListener('click', () => {
 		const isLiked = cardLikeButton.classList.contains(
 			'card__like-button_is-active'
 		)
-		if (isLiked) {
-			unlikeCard(cardData._id).then(updatedCard => {
+		const likeMethod = isLiked ? unlikeCard : likeCard
+
+		likeMethod(cardData._id)
+			.then(updatedCard => {
 				likeCounter.textContent = updatedCard.likes.length
-				cardLikeButton.classList.remove('card__like-button_is-active')
+				cardLikeButton.classList.toggle('card__like-button_is-active')
 			})
-		} else {
-			likeCard(cardData._id).then(updatedCard => {
-				likeCounter.textContent = updatedCard.likes.length
-				cardLikeButton.classList.add('card__like-button_is-active')
-			})
-		}
+			.catch(err => console.log(err))
 	})
 
 	if (cardData.owner._id !== userId) {
@@ -62,16 +57,14 @@ export function handleDelete(cardId, cardElement) {
 	const deletePopup = document.querySelector('.popup_type_delete')
 	openPopup(deletePopup)
 
-	deletePopup
-		.querySelector('.popup__confirm-button')
-		.addEventListener('click', () => {
-			deleteCard(cardId)
-				.then(() => {
-					cardElement.remove()
-					closePopup(deletePopup)
-				})
-				.catch(err => {
-					console.error(err)
-				})
-		})
+	deletePopup.querySelector('.popup__confirm-button').onclick = () => {
+		deleteCard(cardId)
+			.then(() => {
+				cardElement.remove()
+				closePopup(deletePopup)
+			})
+			.catch(err => {
+				console.error(err)
+			})
+	}
 }

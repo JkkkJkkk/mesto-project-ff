@@ -43,7 +43,7 @@ export function createCard(
 	)
 
 	cardPicture.addEventListener('click', () => {
-		handleImageClick(cardData)
+		handleImageClick(cardData.name, cardData.link)
 	})
 
 	cardLikeButton.addEventListener('click', () => {

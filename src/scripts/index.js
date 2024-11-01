@@ -109,7 +109,7 @@ Promise.all([getUserData(), getCards()])
 		profileDescription.textContent = userData.about
 		profileAvatar.style.backgroundImage = `url(${userData.avatar})`
 
-		renderCards(cardsData, userData._id)
+		renderCards(cardsData, userData._id, openImagePopup)
 	})
 	.catch(err => {
 		console.error(err)

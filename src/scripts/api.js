@@ -33,14 +33,7 @@ export const getCards = () => {
 	}).then(checkResponse)
 }
 
-export const renderCards = cardsData => {
-	cardsData.forEach(cardData => {
-		const cardElement = createCard(cardData)
-		placesList.prepend(cardElement)
-	})
-}
-
-function updateUserData(name, about) {
+export function updateUserData(name, about) {
 	return fetch(`${apiUrl}/users/me`, {
 		method: 'PATCH',
 		headers: {
@@ -98,32 +91,13 @@ export function deleteCard(cardId) {
 	}).then(checkResponse)
 }
 
-export function updateAvatar(evt) {
-	evt.preventDefault()
-
-	const avatarUrl = document.querySelector('.popup__input_type_url').value
-
-	if (!avatarUrl) {
-		console.error('Avatar URL is required')
-		return
-	}
-
-	fetch(`${apiUrl}/users/me/avatar`, {
+export function updateAvatar(url) {
+	return fetch(`${apiUrl}/users/me/avatar`, {
 		method: 'PATCH',
 		headers: {
 			authorization: token,
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({
-			avatar: avatarUrl,
-		}),
-	})
-		.then(checkResponse)
-		.then(data => {
-			document.querySelector('.profile__image').src = data.avatar
-			closePopup(document.querySelector('.popup_type_avatar'))
-		})
-		.catch(err => {
-			console.error(err)
-		})
+		body: JSON.stringify({ avatar: url }),
+	}).then(checkResponse)
 }

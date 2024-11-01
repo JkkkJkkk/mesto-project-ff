@@ -1,11 +1,28 @@
 import { likeCard, unlikeCard, deleteCard } from './api'
-import { openImagePopup } from './index'
 
 export function handleLikeButton(event) {
 	event.target.classList.toggle('card__like-button_active')
 }
 
-export function createCard(cardData, userId, deleteHandler) {
+const likeCallback = (cardId, cardButton, likeCounter) => {
+	const isLiked = cardButton.classList.contains('card__like-button_is-active')
+	const likeMethod = isLiked ? unlikeCard : likeCard
+
+	likeMethod(cardId)
+		.then(updatedCard => {
+			likeCounter.textContent = updatedCard.likes.length
+			cardButton.classList.toggle('card__like-button_is-active')
+		})
+		.catch(err => console.log(err))
+}
+
+export function createCard(
+	cardData,
+	userId,
+	deleteHandler,
+	handleImageClick,
+	likeCallback
+) {
 	const cardTemplate = document.querySelector('#card-template').content
 	const cardElement = cardTemplate
 		.querySelector('.places__item')
@@ -15,7 +32,6 @@ export function createCard(cardData, userId, deleteHandler) {
 	const cardDeleteButton = cardElement.querySelector('.card__delete-button')
 	const cardLikeButton = cardElement.querySelector('.card__like-button')
 	const cardLikeCount = cardElement.querySelector('.card__like-count')
-	const likeCounter = cardElement.querySelector('.card__like-count')
 
 	cardPicture.src = cardData.link
 	cardPicture.alt = cardData.name
@@ -25,8 +41,13 @@ export function createCard(cardData, userId, deleteHandler) {
 	cardDeleteButton.addEventListener('click', () =>
 		deleteHandler(cardData._id, cardElement)
 	)
+
 	cardPicture.addEventListener('click', () => {
-		openImagePopup(cardData.link, cardData.name)
+		handleImageClick(cardData)
+	})
+
+	cardLikeButton.addEventListener('click', () => {
+		likeHandler(cardData._id, cardLikeButton, cardLikeCount)
 	})
 
 	cardLikeButton.addEventListener('click', () => {
@@ -37,7 +58,7 @@ export function createCard(cardData, userId, deleteHandler) {
 
 		likeMethod(cardData._id)
 			.then(updatedCard => {
-				likeCounter.textContent = updatedCard.likes.length
+				cardLikeCount.textContent = updatedCard.likes.length
 				cardLikeButton.classList.toggle('card__like-button_is-active')
 			})
 			.catch(err => console.log(err))
@@ -56,7 +77,6 @@ export function createCard(cardData, userId, deleteHandler) {
 export function handleDelete(cardId, cardElement) {
 	const deletePopup = document.querySelector('.popup_type_delete')
 	openPopup(deletePopup)
-
 	deletePopup.querySelector('.popup__confirm-button').onclick = () => {
 		deleteCard(cardId)
 			.then(() => {

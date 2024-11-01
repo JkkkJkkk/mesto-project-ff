@@ -5,7 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "webpack --mode production",
-		"dev": "webpack serve"
+		"dev": "webpack serve",
+		"predeploy": "npm run build",
+		"deploy": "gh-pages -d dist"
 	},
 	"author": "I",
 	"license": "ISC",
@@ -15,6 +17,7 @@
 		"babel-loader": "^9.2.1",
 		"clean-webpack-plugin": "^4.0.0",
 		"css-loader": "^7.1.2",
+		"gh-pages": "^6.2.0",
 		"html-webpack-plugin": "^5.6.0",
 		"mini-css-extract-plugin": "^2.9.1",
 		"webpack": "^5.95.0",

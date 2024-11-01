@@ -1,27 +1,28 @@
-import { validationConfig } from './index'
-
 function hideError(input, config) {
 	const errorElement = input.nextElementSibling
-	errorElement.textContent = ''
+	if (errorElement) {
+		errorElement.textContent = ''
+		errorElement.classList.remove(config.errorClass)
+	}
 	input.classList.remove(config.inputErrorClass)
 }
 
-const validateInput = input => {
+const validateInput = (input, config) => {
 	const errorElement = input.nextElementSibling
+
+	if (!errorElement) {
+		console.warn(`Элемент ошибки не найден для поля: ${input.name}`)
+		return
+	}
 
 	if (!input.validity.valid) {
 		const errorMessage = input.dataset.errorMessage || input.validationMessage
 		errorElement.textContent = errorMessage
-		errorElement.classList.add('popup__error_visible')
+		errorElement.classList.add(config.errorClass)
+		input.classList.add(config.inputErrorClass)
 	} else {
-		errorElement.textContent = ''
-		errorElement.classList.remove('popup__error_visible')
+		hideError(input, config)
 	}
-}
-
-const validateForm = form => {
-	const inputs = form.querySelectorAll('input')
-	inputs.forEach(input => validateInput(input))
 }
 
 function toggleSubmitButton(form, config) {

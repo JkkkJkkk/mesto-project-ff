@@ -2,7 +2,7 @@ import '../pages/index.css'
 import { openPopup, closePopup, handleOverlayClick } from './modal'
 import { createCard } from './card'
 import { enableValidation, clearValidation } from './validation'
-import { updateAvatar, getUserData, getCards, renderCards } from './api.js'
+import { updateUserData, getUserData, getCards } from './api.js'
 
 const profileAvatar = document.querySelector('.profile__image')
 const profilePopup = document.querySelector('.popup_type_edit')
@@ -17,6 +17,29 @@ const profileName = document.querySelector('.profile__title')
 const profileDescription = document.querySelector('.profile__description')
 const nameInput = profilePopup.querySelector('input[name="name"]')
 const jobInput = profilePopup.querySelector('input[name="description"]')
+const avatarForm = document.querySelector('.popup_type_avatar .popup__form')
+const avatarInput = document.querySelector('.popup__input_type_url')
+
+avatarForm.addEventListener('submit', evt => {
+	evt.preventDefault()
+
+	const avatarUrl = avatarInput.value
+
+	if (!avatarUrl) {
+		console.error('Avatar URL is required')
+		return
+	}
+
+	updateAvatar(avatarUrl)
+		.then(data => {
+			document.querySelector('.profile__image').src = data.avatar
+			closePopup(document.querySelector('.popup_type_avatar'))
+			avatarForm.reset()
+		})
+		.catch(err => {
+			console.error(err)
+		})
+})
 
 export const validationConfig = {
 	formSelector: '.popup__form',
@@ -27,7 +50,20 @@ export const validationConfig = {
 	errorClass: 'popup__error_visible',
 }
 
-export function openImagePopup(imageUrl, imageAlt) {
+const renderCards = (cardsData, userId) => {
+	cardsData.forEach(cardData => {
+		const cardElement = createCard(
+			cardData,
+			userId
+			// handleDelete,
+			// likeCallback,
+			// openImagePopup
+		)
+		placesList.prepend(cardElement)
+	})
+}
+
+function openImagePopup(imageUrl, imageAlt) {
 	const popupTypeImage = document.querySelector('.popup_type_image')
 	const popupImage = popupTypeImage.querySelector('.popup__image')
 	const popupCaption = popupTypeImage.querySelector('.popup__caption')
@@ -67,26 +103,13 @@ document.querySelectorAll('.popup').forEach(popup => {
 
 enableValidation(validationConfig)
 
-profileEditButton.addEventListener('click', () => {
-	nameInput.value = profileName.textContent
-	jobInput.value = profileDescription.textContent
-
-	clearValidation(formAddElement, validationConfig)
-	openPopup(profilePopup)
-})
-
-profileAddButton.addEventListener('click', () => {
-	clearValidation(formAddElement, validationConfig)
-	openPopup(popupTypeNewCard)
-})
-
 Promise.all([getUserData(), getCards()])
 	.then(([userData, cardsData]) => {
 		profileName.textContent = userData.name
 		profileDescription.textContent = userData.about
 		profileAvatar.style.backgroundImage = `url(${userData.avatar})`
 
-		renderCards(cardsData)
+		renderCards(cardsData, userData._id)
 	})
 	.catch(err => {
 		console.error(err)
@@ -94,9 +117,6 @@ Promise.all([getUserData(), getCards()])
 
 document.querySelector('.popup_type_edit').addEventListener('submit', evt => {
 	evt.preventDefault()
-	const profilePopup = document.querySelector('.popup_type_edit')
-	const nameInput = document.querySelector('input[name="name"]')
-	const jobInput = document.querySelector('input[name="description"]')
 
 	updateUserData(nameInput.value, jobInput.value)
 		.then(userData => {
@@ -109,6 +129,10 @@ document.querySelector('.popup_type_edit').addEventListener('submit', evt => {
 		})
 })
 
+function handleImageClick(cardData) {
+	openImagePopup(cardData.link, cardData.name)
+}
+
 document
 	.querySelector('.popup_type_new-card')
 	.addEventListener('submit', evt => {
@@ -118,9 +142,15 @@ document
 		const linkInput = document.querySelector('input[name="link"]')
 
 		addCard(nameInput.value, linkInput.value)
-			.then(newCardData => {
-				const newCardElement = createCard(newCardData)
-				placesList.prepend(newCardElement)
+			.then(cardData => {
+				const cardElement = createCard(
+					cardData,
+					cardData.owner._id,
+					handleDelete,
+					handleImageClick,
+					likeCallback
+				)
+				placesList.prepend(cardElement)
 
 				closePopup(document.querySelector('.popup_type_new-card'))
 				evt.target.reset()
@@ -129,7 +159,3 @@ document
 				console.error(err)
 			})
 	})
-
-document
-	.querySelector('.popup__form[name="edit-avatar"]')
-	.addEventListener('submit', updateAvatar)

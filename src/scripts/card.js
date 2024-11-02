@@ -1,10 +1,32 @@
 import { likeCard, unlikeCard, deleteCard } from './api'
+import { openPopup, closePopup } from './modal'
 
 export function handleLikeButton(event) {
 	event.target.classList.toggle('card__like-button_active')
 }
 
-const likeCallback = (cardId, cardButton, likeCounter) => {
+export function deleteHandler(cardId, cardElement) {
+	const deletePopup = document.querySelector('.popup_type_delete')
+
+	if (!deletePopup) {
+		console.error('Popup for deletion not found.')
+		return
+	}
+
+	openPopup(deletePopup)
+	deletePopup.querySelector('.popup__button').onclick = () => {
+		deleteCard(cardId)
+			.then(() => {
+				cardElement.remove()
+				closePopup(deletePopup)
+			})
+			.catch(err => {
+				console.error(err)
+			})
+	}
+}
+
+export const likeCallback = (cardId, cardButton, likeCounter) => {
 	const isLiked = cardButton.classList.contains('card__like-button_is-active')
 	const likeMethod = isLiked ? unlikeCard : likeCard
 
@@ -38,30 +60,12 @@ export function createCard(
 	cardTitle.textContent = cardData.name
 	cardLikeCount.textContent = cardData.likes.length
 
-	cardDeleteButton.addEventListener('click', () =>
-		deleteHandler(cardData._id, cardElement)
-	)
-
 	cardPicture.addEventListener('click', () => {
-		handleImageClick(cardData.name, cardData.link)
+		handleImageClick({ link: cardData.link, name: cardData.name })
 	})
 
 	cardLikeButton.addEventListener('click', () => {
-		likeHandler(cardData._id, cardLikeButton, cardLikeCount)
-	})
-
-	cardLikeButton.addEventListener('click', () => {
-		const isLiked = cardLikeButton.classList.contains(
-			'card__like-button_is-active'
-		)
-		const likeMethod = isLiked ? unlikeCard : likeCard
-
-		likeMethod(cardData._id)
-			.then(updatedCard => {
-				cardLikeCount.textContent = updatedCard.likes.length
-				cardLikeButton.classList.toggle('card__like-button_is-active')
-			})
-			.catch(err => console.log(err))
+		likeCallback(cardData._id, cardLikeButton, cardLikeCount)
 	})
 
 	if (cardData.owner._id !== userId) {
@@ -72,19 +76,4 @@ export function createCard(
 		)
 	}
 	return cardElement
-}
-
-export function handleDelete(cardId, cardElement) {
-	const deletePopup = document.querySelector('.popup_type_delete')
-	openPopup(deletePopup)
-	deletePopup.querySelector('.popup__confirm-button').onclick = () => {
-		deleteCard(cardId)
-			.then(() => {
-				cardElement.remove()
-				closePopup(deletePopup)
-			})
-			.catch(err => {
-				console.error(err)
-			})
-	}
 }

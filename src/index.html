@@ -101,7 +101,7 @@
 							class="popup__input popup__input_type_url"
 							placeholder="Ссылка на картинку"
 							required
-							pattern="^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$"
+							pattern="https?://.*"
 							data-error-message="Введите корректный URL"
 						/>
 						<span class="popup__error"></span>
@@ -129,7 +129,7 @@
 							class="popup__input popup__input_type_url"
 							placeholder="Ссылка на картинку"
 							required
-							pattern="^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$"
+							pattern="^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-]*)?(\?.*)?$"
 							data-error-message="Введите корректный URL"
 						/>
 						<span class="popup__error"></span>
@@ -138,6 +138,14 @@
 						</button>
 					</form>
 				</div>
+			</div>
+		</div>
+		<!-- Пример разметки popup для удаления -->
+		<div class="popup popup_type_delete">
+			<div class="popup__content" style="min-height: 0">
+				<button type="button" class="popup__close"></button>
+				<h3 class="popup__title">Вы уверены?</h3>
+				<button type="button" class="button popup__button">Да</button>
 			</div>
 		</div>
 		<template id="card-template">

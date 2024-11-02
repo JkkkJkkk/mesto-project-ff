@@ -47,7 +47,7 @@ export function updateUserData(name, about) {
 	}).then(checkResponse)
 }
 
-function addCard(name, link) {
+export function addCard(name, link) {
 	if (!name || !link) {
 		console.error('Name and link cannot be empty')
 		return Promise.reject('Name and link cannot be empty')

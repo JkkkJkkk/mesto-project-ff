@@ -1,8 +1,8 @@
 import '../pages/index.css'
 import { openPopup, closePopup, handleOverlayClick } from './modal'
-import { createCard } from './card'
+import { createCard, deleteHandler, likeCallback } from './card'
 import { enableValidation, clearValidation } from './validation'
-import { updateUserData, getUserData, getCards } from './api.js'
+import { updateUserData, getUserData, getCards, addCard } from './api.js'
 
 const profileAvatar = document.querySelector('.profile__image')
 const profilePopup = document.querySelector('.popup_type_edit')
@@ -54,10 +54,10 @@ const renderCards = (cardsData, userId) => {
 	cardsData.forEach(cardData => {
 		const cardElement = createCard(
 			cardData,
-			userId
-			// handleDelete,
-			// likeCallback,
-			// openImagePopup
+			userId,
+			deleteHandler,
+			handleImageClick,
+			likeCallback
 		)
 		placesList.prepend(cardElement)
 	})
@@ -103,11 +103,14 @@ document.querySelectorAll('.popup').forEach(popup => {
 
 enableValidation(validationConfig)
 
+let userId;
+
 Promise.all([getUserData(), getCards()])
 	.then(([userData, cardsData]) => {
 		profileName.textContent = userData.name
 		profileDescription.textContent = userData.about
 		profileAvatar.style.backgroundImage = `url(${userData.avatar})`
+		userId = userData._id
 
 		renderCards(cardsData, userData._id, openImagePopup)
 	})
@@ -145,8 +148,8 @@ document
 			.then(cardData => {
 				const cardElement = createCard(
 					cardData,
-					cardData.owner._id,
-					handleDelete,
+					userId,
+					deleteHandler,
 					handleImageClick,
 					likeCallback
 				)

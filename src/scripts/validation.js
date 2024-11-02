@@ -58,7 +58,13 @@ export const enableValidation = config => {
 
 		const inputs = form.querySelectorAll(config.inputSelector)
 		inputs.forEach(input => {
-			input.addEventListener('input', () => validateInput(input, config))
+			input.addEventListener('input', () => {
+				validateInput(input, config)
+				toggleSubmitButton(form, config) // Обновляем состояние кнопки
+			})
 		})
+
+		// Устанавливаем начальное состояние кнопки после загрузки
+		toggleSubmitButton(form, config)
 	})
 }
